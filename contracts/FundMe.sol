@@ -12,14 +12,16 @@ contract FundMe {
     mapping(address => uint256) addressToAmountFunded;
 
     address public immutable i_owner; //different naming convention _i for immutable variables
+    AggregatorV3Interface public priceFeed;
 
-    constructor() {
-        i_owner = msg.sender; //msg.sender here the person who deploys the co tract since it is in Constructor
+    constructor(address priceFeedAddress) {
+        i_owner = msg.sender; //msg.sender here the person who deploys the contract since it is in Constructor
+        priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     function fund() public payable {
         require(
-            msg.value.getConversionRate() >= MINIMUM_USD,
+            msg.value.getConversionRate(priceFeed) >= MINIMUM_USD, //getConversionRate() takes two parameters ethAmount and addrss, msg.value by default is the first paramaeter so we will pass address only in paranthesis
             "Didn't Send Enough"
         );
         // require(getConversionRate(msg.value) >= minimumUsd, "Didn't send enough");//1e18 = 1 * 10**28 gwei
