@@ -27,7 +27,7 @@ module.exports = {
       url: SEPOLIA_RPC_URL,
       accounts: [PRIVATE_KEY],
       chainId: 11155111,
-      // blockConfirmations: 6,
+      blockConfirmations: 6, //two reasons why we add this: 1) >>>Security 2) Give etherscan chance to index the transaction
     },
   },
   etherscan: {
@@ -35,11 +35,11 @@ module.exports = {
     // customChains: [], // uncomment this line if you are getting a TypeError: customChains is not iterable
   },
   gasReporter: {
-    enabled: true,
+    enabled: false,
     currency: "INR",
     outputFile: "gas-report.txt",
     noColors: true,
-    // coinmarketcap: COINMARKETCAP_API_KEY,
+    coinmarketcap: COINMARKETCAP_API_KEY,
   },
   scripts: {
     // Specify the directory where scripts are located
