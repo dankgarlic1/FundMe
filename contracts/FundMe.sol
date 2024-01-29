@@ -27,6 +27,16 @@ contract FundMe {
         priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
+    function getAddressToAmountFunded(
+        address fundingAddress
+    ) public view returns (uint256) {
+        return addressToAmountFunded[fundingAddress];
+    }
+
+    function getFunders(uint256 index) public view returns (address) {
+        return Funders[index];
+    }
+
     function fund() public payable {
         require(
             msg.value.getConversionRate(priceFeed) >= MINIMUM_USD, //getConversionRate() takes two parameters ethAmount and addrss, msg.value by default is the first paramaeter so we will pass address only in paranthesis
@@ -44,6 +54,7 @@ contract FundMe {
         }
         //reset the array
         Funders = new address[](0);
+
         //to withdraw funds we have 3 methods, transfer, send and call
         //transfer
         payable(msg.sender).transfer(address(this).balance);
@@ -55,7 +66,7 @@ contract FundMe {
         //call(recommended)
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
-        }(""); //returns 2 variable b ut we only need one
+        }(""); //returns 2 variable but we only need one
         require(callSuccess, "fail");
     }
 
