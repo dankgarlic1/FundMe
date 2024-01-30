@@ -8,6 +8,7 @@ IT IS TESTED IN LOCAL ENVIRONMENT ie : 1)Hardhat 2)Forked Hardhat network
 
 const { assert, expect } = require("chai");
 const { deployments, ethers, getNamedAccounts } = require("hardhat");
+// const provider = waffle.provider;
 
 // deploy fundme contract on our local Hardhat Network
 
@@ -61,32 +62,37 @@ describe("FundMe", async function () {
       });
       it("withdraws ETH from a single funder", async () => {
         // Arrange
-        const startingFundMeBalance = await fundMe.provider.getBalance(
-          fundMe.getAddress()
+        const startingFundMeBalance = await ethers.provider.getBalance(
+          fundMe.target
         );
-        const startingDeployerBalance = await fundMe.provider.getBalance(
+        // console.log(startingFundMeBalance);
+        const startingDeployerBalance = await ethers.provider.getBalance(
           deployer
         );
+        // console.log(startingDeployerBalance);
 
         // Act
         const transactionResponse = await fundMe.withdraw();
-        const transactionReceipt = await transactionResponse.wait();
-        const { gasUsed, effectiveGasPrice } = transactionReceipt;
-        const gasCost = gasUsed.mul(effectiveGasPrice);
+        const transactionReceipt = await transactionResponse.wait(1);
 
-        const endingFundMeBalance = await fundMe.provider.getBalance(
-          fundMe.getAddress()
+        // console.log(transactionReceipt);
+        const { gasUsed, gasPrice } = transactionReceipt;
+        const gasCost = gasUsed * gasPrice;
+        const endingFundMeBalance = await ethers.provider.getBalance(
+          fundMe.target
         );
-        const endingDeployerBalance = await fundMe.provider.getBalance(
+        // console.log(endingFundMeBalance);
+        const endingDeployerBalance = await ethers.provider.getBalance(
           deployer
         );
+        // console.log(endingDeployerBalance);
 
         // Assert
         // Maybe clean up to understand the testing
         assert.equal(endingFundMeBalance, 0);
         assert.equal(
-          startingFundMeBalance.add(startingDeployerBalance).toString(),
-          endingDeployerBalance.add(gasCost).toString()
+          startingFundMeBalance + startingDeployerBalance,
+          endingDeployerBalance + gasCost
         );
       });
     });
