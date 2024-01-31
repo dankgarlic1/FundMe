@@ -76,7 +76,38 @@ describe("FundMe", async function () {
         const transactionReceipt = await transactionResponse.wait(1);
 
         // console.log(transactionReceipt);
-        const { gasUsed, gasPrice } = transactionReceipt;
+        const { gasUsed, gasPrice } = transactionReceipt; // we are pulling objects gasUsed, gasPrice from transaction receipt
+        const gasCost = gasUsed * gasPrice;
+        const endingFundMeBalance = await ethers.provider.getBalance(
+          fundMe.target
+        );
+        // console.log(endingFundMeBalance);
+        const endingDeployerBalance = await ethers.provider.getBalance(
+          deployer
+        );
+        // console.log(endingDeployerBalance);
+
+        // Assert
+        // Maybe clean up to understand the testing
+        assert.equal(endingFundMeBalance, 0);
+        assert.equal(
+          startingFundMeBalance + startingDeployerBalance,
+          endingDeployerBalance + gasCost
+        );
+      });
+      it("Withdrawing from multiple Funders", async function () {
+        const accounts = await ethers.getSigner();
+        for (let i = 1; i < 6; i++) {
+          //index starts with  because 0th index is of deployer
+          const fundMeConnectedContract = await fundMe.connect(accounts[i]); //we have to connect thes accounts to the contract, because deployer account is connected above
+          await fundMe.fund({ value: sendValue });
+        }
+        // Act
+        const transactionResponse = await fundMe.withdraw();
+        const transactionReceipt = await transactionResponse.wait(1);
+
+        // console.log(transactionReceipt);
+        const { gasUsed, gasPrice } = transactionReceipt; // we are pulling objects gasUsed, gasPrice from transaction receipt
         const gasCost = gasUsed * gasPrice;
         const endingFundMeBalance = await ethers.provider.getBalance(
           fundMe.target

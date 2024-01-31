@@ -74,11 +74,11 @@ contract FundMe {
 
     //solidity has two special functions for this 1)recieve() 2)fallback()
 
-    receive() external payable {
-        fund();
-    }
+    // receive() external payable {
+    //     fund();
+    // }
 
-    fallback() external payable {
-        fund();
-    }
+    // fallback() external payable {
+    //     fund();
+    // }
 }
