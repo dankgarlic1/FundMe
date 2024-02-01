@@ -8,11 +8,11 @@ contract FundMe {
     using PriceConverter for uint256;
     uint256 public constant MINIMUM_USD = 50 * 1e18; //constant variables have different naming convention
 
-    address[] Funders;
-    mapping(address => uint256) addressToAmountFunded;
+    address[] s_Funders; //all vaiables which are storage variable, we have different naming convention of s_
+    mapping(address => uint256) s_addressToAmountFunded; //all vaiables which are storage variable, we have different naming convention of s_
 
     address public immutable i_owner; //different naming convention _i for immutable variables
-    AggregatorV3Interface public priceFeed;
+    AggregatorV3Interface public s_priceFeed; //all vaiables which are storage variable, we have different naming convention of s_
 
     modifier onlyOwner() {
         // require(msg.sender==i_owner);
@@ -22,38 +22,38 @@ contract FundMe {
         _;
     }
 
-    constructor(address priceFeedAddress) {
+    constructor(address s_priceFeedAddress) {
         i_owner = msg.sender; //msg.sender here the person who deploys the contract since it is in Constructor
-        priceFeed = AggregatorV3Interface(priceFeedAddress);
+        s_priceFeed = AggregatorV3Interface(s_priceFeedAddress);
     }
 
     function getAddressToAmountFunded(
         address fundingAddress
     ) public view returns (uint256) {
-        return addressToAmountFunded[fundingAddress];
+        return s_addressToAmountFunded[fundingAddress];
     }
 
     function getFunders(uint256 index) public view returns (address) {
-        return Funders[index];
+        return s_Funders[index];
     }
 
     function fund() public payable {
         require(
-            msg.value.getConversionRate(priceFeed) >= MINIMUM_USD, //getConversionRate() takes two parameters ethAmount and addrss, msg.value by default is the first paramaeter so we will pass address only in paranthesis
+            msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, //getConversionRate() takes two parameters ethAmount and addrss, msg.value by default is the first paramaeter so we will pass address only in paranthesis
             "Didn't Send Enough"
         );
         // require(getConversionRate(msg.value) >= minimumUsd, "Didn't send enough");//1e18 = 1 * 10**28 gwei
-        Funders.push(msg.sender);
-        addressToAmountFunded[msg.sender] = msg.value;
+        s_Funders.push(msg.sender);
+        s_addressToAmountFunded[msg.sender] = msg.value;
     }
 
     function withdraw() public onlyOwner {
-        for (uint256 fundIndex = 0; fundIndex < Funders.length; fundIndex++) {
-            address funder = Funders[fundIndex];
-            addressToAmountFunded[funder] = 0;
+        for (uint256 fundIndex = 0; fundIndex < s_Funders.length; fundIndex++) {
+            address funder = s_Funders[fundIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
         //reset the array
-        Funders = new address[](0);
+        s_Funders = new address[](0);
 
         //to withdraw funds we have 3 methods, transfer, send and call
         //transfer

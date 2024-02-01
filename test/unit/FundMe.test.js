@@ -31,7 +31,7 @@ describe("FundMe", async function () {
   }),
     describe("constructor", async function () {
       it("Sets the aggregator address correctly", async function () {
-        const realChainValue = await fundMe.priceFeed();
+        const realChainValue = await fundMe.s_priceFeed();
         const mockV3Address = await mockV3Aggregator.getAddress();
         // console.log(`Price Feed: ${realChainValue} `);
         // console.log(`address of mock v3: ${mockV3Address} `);
@@ -117,9 +117,9 @@ describe("FundMe", async function () {
         const transactionReceipt = await transactionResponse.wait(1);
         const { gasUsed, gasPrice } = transactionReceipt;
         const withdrawGasCost = gasUsed * gasPrice;
-        console.log(`GasCost: ${withdrawGasCost}`);
-        console.log(`GasUsed: ${gasUsed}`);
-        console.log(`GasPrice: ${gasPrice}`);
+        // console.log(`GasCost: ${withdrawGasCost}`);
+        // console.log(`GasUsed: ${gasUsed}`);
+        // console.log(`GasPrice: ${gasPrice}`);
         const endingFundMeBalance = await ethers.provider.getBalance(
           fundMe.target
         );
