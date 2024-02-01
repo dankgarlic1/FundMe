@@ -96,35 +96,49 @@ describe("FundMe", async function () {
         );
       });
       it("Withdrawing from multiple Funders", async function () {
-        const accounts = await ethers.getSigner();
-        for (let i = 1; i < 6; i++) {
-          //index starts with  because 0th index is of deployer
-          const fundMeConnectedContract = await fundMe.connect(accounts[i]); //we have to connect thes accounts to the contract, because deployer account is connected above
-          await fundMe.fund({ value: sendValue });
+        // Arrange
+        const accounts = await ethers.getSigners();
+        // console.log(accounts);
+        for (i = 1; i < 6; i++) {
+          const fundMeConnectedContract = await fundMe.connect(accounts[i]);
+          await fundMeConnectedContract.fund({ value: sendValue });
         }
+        const startingFundMeBalance = await ethers.provider.getBalance(
+          fundMe.target
+        );
+        const startingDeployerBalance = await ethers.provider.getBalance(
+          deployer
+        );
+
         // Act
         const transactionResponse = await fundMe.withdraw();
+        // Let's comapre gas costs :)
         const transactionReceipt = await transactionResponse.wait(1);
-
-        // console.log(transactionReceipt);
-        const { gasUsed, gasPrice } = transactionReceipt; // we are pulling objects gasUsed, gasPrice from transaction receipt
-        const gasCost = gasUsed * gasPrice;
+        const { gasUsed, gasPrice } = transactionReceipt;
+        const withdrawGasCost = gasUsed * gasPrice;
+        console.log(`GasCost: ${withdrawGasCost}`);
+        console.log(`GasUsed: ${gasUsed}`);
+        console.log(`GasPrice: ${gasPrice}`);
         const endingFundMeBalance = await ethers.provider.getBalance(
           fundMe.target
         );
-        // console.log(endingFundMeBalance);
         const endingDeployerBalance = await ethers.provider.getBalance(
           deployer
         );
-        // console.log(endingDeployerBalance);
-
         // Assert
-        // Maybe clean up to understand the testing
-        assert.equal(endingFundMeBalance, 0);
         assert.equal(
           startingFundMeBalance + startingDeployerBalance,
-          endingDeployerBalance + gasCost
+          endingDeployerBalance + withdrawGasCost
         );
+        // Make a getter for storage variables
+        await expect(fundMe.getFunders(0)).to.be.reverted;
+
+        for (i = 1; i < 6; i++) {
+          assert.equal(
+            await fundMe.getAddressToAmountFunded(accounts[i].address),
+            0
+          );
+        }
       });
     });
   });
