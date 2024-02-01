@@ -7,6 +7,7 @@ IT IS TESTED IN LOCAL ENVIRONMENT ie : 1)Hardhat 2)Forked Hardhat network
  */
 
 const { assert, expect } = require("chai");
+const { Contract } = require("ethers");
 const { deployments, ethers, getNamedAccounts } = require("hardhat");
 // const provider = waffle.provider;
 
@@ -139,6 +140,15 @@ describe("FundMe", async function () {
             0
           );
         }
+      });
+      it("Only allows owner to withdraw", async function () {
+        const accounts = await ethers.getSigners();
+        const attacker = await fundMe.connect(accounts[1]);
+
+        await expect(attacker.withdraw()).to.be.revertedWithCustomError(
+          fundMe,
+          "FundMe__notOwner"
+        );
       });
     });
   });
