@@ -70,6 +70,18 @@ contract FundMe {
         require(callSuccess, "fail");
     }
 
+    function cheaperWithdraw() public onlyOwner {
+        address[] memory funders = s_Funders;
+        for (uint256 fundIndex = 0; fundIndex < funders.length; fundIndex++) {
+            address funder = funders[fundIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+        s_Funders = new address[](0);
+        // payable(msg.sender).transfer(address(this).balance);
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
+        require(success);
+    }
+
     //What if someone sends ETH to the contract address without calling FUND fucntion?
 
     //solidity has two special functions for this 1)recieve() 2)fallback()
