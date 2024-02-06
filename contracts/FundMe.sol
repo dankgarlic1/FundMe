@@ -8,7 +8,7 @@ error FundMe__notEnoughETH();
 contract FundMe {
     using PriceConverter for uint256;
     uint256 public constant MINIMUM_USD = 50 * 1e18; //constant variables have different naming convention
-    address[] private s_Funders; //all vaiables which are storage variable, we have different naming convention of s_
+    address[] private s_Funders; //all variables which are storage variable, we have different naming convention of s_
     mapping(address => uint256) private s_addressToAmountFunded; //all vaiables which are storage variable, we have different naming convention of s_
     address private immutable i_owner; //different naming convention _i for immutable variables
     AggregatorV3Interface private s_priceFeed; //all vaiables which are storage variable, we have different naming convention of s_

@@ -104,6 +104,15 @@ const { deployments, ethers, getNamedAccounts } = require("hardhat");
               endingDeployerBalance + gasCost
             );
           });
+          it("returns correct address of Owner", async () => {
+            const ownerAddress = await fundMe.getOwner();
+            const funderArray = await fundMe.getFunders(0);
+            assert.equal(
+              ownerAddress.toString(),
+              funderArray.toString(),
+              "The owner declared and array mapping is same"
+            );
+          });
           it("Withdrawing from multiple Funders", async function () {
             // Arrange
             const accounts = await ethers.getSigners();
