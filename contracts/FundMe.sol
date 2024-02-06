@@ -3,16 +3,15 @@ pragma solidity ^0.8.8;
 import "./PriceConverter.sol";
 
 error FundMe__notOwner();
+error FundMe__notEnoughETH();
 
 contract FundMe {
     using PriceConverter for uint256;
     uint256 public constant MINIMUM_USD = 50 * 1e18; //constant variables have different naming convention
-
-    address[] s_Funders; //all vaiables which are storage variable, we have different naming convention of s_
-    mapping(address => uint256) s_addressToAmountFunded; //all vaiables which are storage variable, we have different naming convention of s_
-
-    address public immutable i_owner; //different naming convention _i for immutable variables
-    AggregatorV3Interface public s_priceFeed; //all vaiables which are storage variable, we have different naming convention of s_
+    address[] private s_Funders; //all vaiables which are storage variable, we have different naming convention of s_
+    mapping(address => uint256) private s_addressToAmountFunded; //all vaiables which are storage variable, we have different naming convention of s_
+    address private immutable i_owner; //different naming convention _i for immutable variables
+    AggregatorV3Interface private s_priceFeed; //all vaiables which are storage variable, we have different naming convention of s_
 
     modifier onlyOwner() {
         // require(msg.sender==i_owner);
@@ -27,21 +26,10 @@ contract FundMe {
         s_priceFeed = AggregatorV3Interface(s_priceFeedAddress);
     }
 
-    function getAddressToAmountFunded(
-        address fundingAddress
-    ) public view returns (uint256) {
-        return s_addressToAmountFunded[fundingAddress];
-    }
-
-    function getFunders(uint256 index) public view returns (address) {
-        return s_Funders[index];
-    }
-
     function fund() public payable {
-        require(
-            msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, //getConversionRate() takes two parameters ethAmount and addrss, msg.value by default is the first paramaeter so we will pass address only in paranthesis
-            "Didn't Send Enough"
-        );
+        if (msg.value.getConversionRate(s_priceFeed) <= MINIMUM_USD) {
+            revert FundMe__notEnoughETH();
+        }
         // require(getConversionRate(msg.value) >= minimumUsd, "Didn't send enough");//1e18 = 1 * 10**28 gwei
         s_Funders.push(msg.sender);
         s_addressToAmountFunded[msg.sender] = msg.value;
@@ -93,4 +81,22 @@ contract FundMe {
     // fallback() external payable {
     //     fund();
     // }
+
+    function getAddressToAmountFunded(
+        address fundingAddress
+    ) public view returns (uint256) {
+        return s_addressToAmountFunded[fundingAddress];
+    }
+
+    function getFunders(uint256 index) public view returns (address) {
+        return s_Funders[index];
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return s_priceFeed;
+    }
 }
